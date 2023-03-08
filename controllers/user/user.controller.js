@@ -1,8 +1,11 @@
 const User = require("../../models/user.model");
 const bcrypt = require("bcrypt");
 const jwt = require('jsonwebtoken');
+const { findUserByEmail, saveUser } = require("./user.subController");
+const { validatePassword } = require("../../utils/password.util");
+const { generateJwt } = require("../../utils/jwt.util");
 
-const createUser = (req, res, next) => {
+const createUser = async(req, res, next) => {
   try {
     const { name, email, password } = req.body;
 
@@ -12,24 +15,11 @@ const createUser = (req, res, next) => {
 
     // Hash the password with the salt
     const hashedPassword = bcrypt.hashSync(password, salt);
-    const newUser = new User({
-      name,
-      email,
-      password: hashedPassword,
-      salt,
-    });
-
-    // save the user to the database
-    newUser
-      .save()
-      .then(() => {
-        res.status(201).send("success");
-        console.log("User created");
-      })
-      .catch((err) => {
-        console.log(err);
-        res.status(500).send("error creating user");
-      });
+    const createdUser = await saveUser({name, email, password: hashedPassword});
+    if(createdUser){
+      console.log("User created");
+     return res.status(201).send("success");
+    }
   } catch (error) {
     res.status(500).send("error creating user");
   }
@@ -39,7 +29,7 @@ const createUser = (req, res, next) => {
 const checkUserIfExists = async (req, res, next) => {
   try {
     const { email } = req.body;
-    const user = await User.findOne({ email }).lean();
+    const user = await findUserByEmail(email);
     if (user) {
       res.status(409).send("User already exists with this email address");
     } else {
@@ -54,10 +44,7 @@ const checkUserIfExists = async (req, res, next) => {
 const userLogin = async (req, res, next) => {
   try {
     const { email } = req.query;
-    const user = await User.findOne(
-      { email },
-      { email: 1, password: 1, salt: 1 }
-    ).lean();
+    const user = await findUserByEmail({email});
     if (user) {
       req.user = user;
       next();
@@ -65,23 +52,23 @@ const userLogin = async (req, res, next) => {
       res.status(404).send("User not found");
     }
   } catch (error) {
-    res.status(400).status(error);
+    res.status(400).send(error);
   }
 };
 
-// check if user is valid
+// check if user password is valid
 const validateUserPassword = async (req, res, next) => {
   try {
     const { password: hashedPassword } = req.user;
     const { password } = req.query;
-    const isPasswordValid = await bcrypt.compare(password, hashedPassword);
+    const isPasswordValid = await validatePassword({password, hashedPassword});
     if (isPasswordValid) {
       next();
     } else {
       res.status(401).send("Invalid password");
     }
   } catch (error) {
-    res.status(400).status(error);
+    res.status(400).send(error);
   }
 };
 
@@ -89,18 +76,14 @@ const validateUserPassword = async (req, res, next) => {
 const generateJwtToken = async (req, res, next) => {
   try {
     const { email } = req.query;
-    const secretKey = process.env.JWT_SECRET_KEY;
-    const payload = {
-        email
-    };
-    const options = {
-      expiresIn: "1h", // Set the token to expire in 1 hour
-    };
-    const token = jwt.sign(payload, secretKey, options);
-    res.status(200).send(token);
+    const expiresIn = "1h";
+    const jwt = await generateJwt({email, expiresIn});
+    if(jwt){
+      res.status(200).send(jwt);
+    }
   } catch (error) {
     console.error(error);
-    res.status(400).status(error);
+    res.status(400).send(error);
   }
 };
 module.exports = {
