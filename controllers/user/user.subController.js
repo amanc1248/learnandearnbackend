@@ -20,11 +20,24 @@ const findUserByEmail = async ({ email }) => {
     if (user) return user;
     return null;
   } catch (error) {
+    console.error(error);
     throw new Error(error);
   }
 };
 
+const updateUserPassword = async({email, password})=>{
+  try{
+    const result =  await User.findOneAndUpdate({email},{$set: {password}}).lean();
+    if(result){
+      return "success";
+    }
+  }catch(error){
+    console.error(error)
+    throw new Error(error);
+  }
+}
 module.exports = {
   findUserByEmail,
   saveUser,
+  updateUserPassword,
 };

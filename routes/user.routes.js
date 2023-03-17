@@ -6,6 +6,7 @@ const {
   validateUserPassword,
   generateJwtToken,
   checkIfUserExistsForResetingPassword,
+  changeUserPassword,
 } = require("../controllers/user/user.controller");
 const { authenticateToken } = require("../middlewares/auth.middlewares");
 const { sendEmail } = require("../utils/email.util");
@@ -17,7 +18,7 @@ router.post("/", checkUserIfExists, createUser);
 
 router.post("/sendEmail", sendEmail);
 router.get("/login", userLogin, validateUserPassword, generateJwtToken);
-router.put("/resetPassword",checkIfUserExistsForResetingPassword )
+router.put("/resetPassword",checkIfUserExistsForResetingPassword,changeUserPassword);
 router.get("/test", authenticateToken, (req, res, next) => {
   res.send("test success");
 });

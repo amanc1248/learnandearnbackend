@@ -10,6 +10,22 @@ const validatePassword = async ({ password, hashedPassword }) => {
   }
 };
 
+// generate hashed password
+const generateHashedPassword = async ({ password }) => {
+  try {
+    // Generate a salt
+    const saltRounds = 10;
+    const salt = bcrypt.genSaltSync(saltRounds);
+
+    // Hash the password with the salt
+    const hashedPassword = bcrypt.hashSync(password, salt);
+    return hashedPassword;
+  } catch (error) {
+    console.error(error);
+    throw new Error(error);
+  }
+};
 module.exports = {
   validatePassword,
+  generateHashedPassword,
 };
