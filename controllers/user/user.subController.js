@@ -8,7 +8,7 @@ const saveUser = async ({ name, email, password }) => {
       password,
     });
     const createdUser = await newUser.save();
-    if(createdUser) return createdUser;
+    if (createdUser) return createdUser;
   } catch (error) {
     throw new Error(error);
   }
@@ -16,13 +16,8 @@ const saveUser = async ({ name, email, password }) => {
 
 const findUserByEmail = async ({ email }) => {
   try {
-    const user = await User.findOne(
-      { email },
-      { email: 1, password: 1 }
-    ).lean();
-    if (user) {
-      return user;
-    }
+    const user = await User.findOne({ email }, { email: 1, password: 1 }).lean();
+    if (user) return user;
     return null;
   } catch (error) {
     throw new Error(error);

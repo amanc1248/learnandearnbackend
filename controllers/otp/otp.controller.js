@@ -2,6 +2,8 @@ const OTP = require("../../models/otp.model");
 const { sendEmail } = require("../../utils/email.util");
 const dotenv = require('dotenv');
 dotenv.config();
+
+// sending otp
 const sendOTP = async (req,res,next) => {
   try {
     const {email} = req.body;
@@ -15,6 +17,7 @@ const sendOTP = async (req,res,next) => {
   }
 };
 
+// saving otp
 const saveOTP = (req,res,next) => {
   try {
     const {otp} = req;
@@ -31,7 +34,6 @@ const saveOTP = (req,res,next) => {
       });
   } catch (error) {}
 };
-
 
 // get otp
 const getOTP = async(req,res,next)=>{
@@ -53,9 +55,6 @@ const getOTP = async(req,res,next)=>{
 const verifyOTP = (req,res)=>{
   try{
     const {expiryDate} = req.otp;
-    console.log(expiryDate);
-    console.log(new Date());
-    console.log(Math.abs(expiryDate - new Date()))
     const valid =Math.abs(expiryDate - new Date())< process.env.EXPIRY_MINUTES *60 *1000;
     if(valid){
       res.status(200).send("valid");

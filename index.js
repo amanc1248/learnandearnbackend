@@ -2,8 +2,8 @@ const express = require("express");
 const app = express();
 const dotenv = require("dotenv");
 const database = require("./database/database");
-const userRouter = require("./routes/user.route.js")
-const otpRouter = require("./routes/otp.route.js")
+const userRouter = require("./routes/user.routes.js")
+const otpRouter = require("./routes/otp.routes.js")
 const bodyParser = require("body-parser");
 const cors = require("cors");
 dotenv.config();

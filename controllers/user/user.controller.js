@@ -29,7 +29,7 @@ const createUser = async(req, res, next) => {
 const checkUserIfExists = async (req, res, next) => {
   try {
     const { email } = req.body;
-    const user = await findUserByEmail(email);
+    const user = await findUserByEmail({email});
     if (user) {
       res.status(409).send("User already exists with this email address");
     } else {
@@ -52,6 +52,7 @@ const userLogin = async (req, res, next) => {
       res.status(404).send("User not found");
     }
   } catch (error) {
+    console.log(error)
     res.status(400).send(error);
   }
 };
@@ -68,6 +69,7 @@ const validateUserPassword = async (req, res, next) => {
       res.status(401).send("Invalid password");
     }
   } catch (error) {
+    console.error(error)
     res.status(400).send(error);
   }
 };
@@ -86,10 +88,43 @@ const generateJwtToken = async (req, res, next) => {
     res.status(400).send(error);
   }
 };
+
+// check if user exists before sending otp
+const checkIfuserExistsBeforeSendingOTP = async (req, res, next) => {
+  try {
+    const { email } = req.body;
+    const user = await findUserByEmail({email});
+    if (user) {
+      res.status(409).send("User already exists. Please login.");
+    } else {
+      next();
+    }
+  } catch (error) {
+    console.error(error)
+    res.status(400).send(error);
+  }
+};
+
+// check if user exists or not before sending otp for resetting password
+const checkIfUserExistsForResetingPassword = async(req, res, next)=>{
+  try {
+    const { email } = req.body;
+    const user = await findUserByEmail({email});
+    if (user) {
+      next();
+    } else {
+      res.status(409).send("User does not exist with that email address");
+    }
+  } catch (error) {
+    res.status(400).send(error);
+  }
+}
 module.exports = {
   createUser,
   checkUserIfExists,
   userLogin,
   validateUserPassword,
   generateJwtToken,
+  checkIfuserExistsBeforeSendingOTP,
+  checkIfUserExistsForResetingPassword,
 };
