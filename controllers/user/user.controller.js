@@ -1,25 +1,13 @@
-const User = require("../../models/user.model");
-const bcrypt = require("bcrypt");
-const jwt = require('jsonwebtoken');
-const { findUserByEmail, saveUser } = require("./user.subController");
-const { validatePassword } = require("../../utils/password.util");
+const { findUserByEmail, saveUser, updateUserPassword } = require("./user.subController");
+const { validatePassword, generateHashedPassword } = require("../../utils/password.util");
 const { generateJwt } = require("../../utils/jwt.util");
 
 const createUser = async(req, res, next) => {
   try {
     const { name, email, password } = req.body;
-
-    // Generate a salt
-    const saltRounds = 10;
-    const salt = bcrypt.genSaltSync(saltRounds);
-
-    // Hash the password with the salt
-    const hashedPassword = bcrypt.hashSync(password, salt);
-    const createdUser = await saveUser({name, email, password: hashedPassword});
-    if(createdUser){
-      console.log("User created");
-     return res.status(201).send("success");
-    }
+    const hashedPassword = await generateHashedPassword({password});
+    const createdUser    = await saveUser({name, email, password: hashedPassword});
+    if(createdUser) return res.status(201).send("success");
   } catch (error) {
     res.status(500).send("error creating user");
   }
@@ -119,6 +107,19 @@ const checkIfUserExistsForResetingPassword = async(req, res, next)=>{
     res.status(400).send(error);
   }
 }
+
+// change user password
+const changeUserPassword = async(req,res,next)=>{
+  try{
+    const {email, password} = req.body;
+    const hashedPassword = await generateHashedPassword({password});
+    const result         = await updateUserPassword({email, password: hashedPassword});
+    if(result) return res.status(200).send("success");
+  }catch(error){
+    console.error(error);
+    res.status(400).send(error);
+  }
+}
 module.exports = {
   createUser,
   checkUserIfExists,
@@ -127,4 +128,5 @@ module.exports = {
   generateJwtToken,
   checkIfuserExistsBeforeSendingOTP,
   checkIfUserExistsForResetingPassword,
+  changeUserPassword,
 };
