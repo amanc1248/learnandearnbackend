@@ -8,7 +8,6 @@ const {
   checkIfUserExistsForResetingPassword,
   changeUserPassword,
 } = require("../controllers/user/user.controller");
-const { authenticateToken } = require("../middlewares/auth.middlewares");
 const { sendEmail } = require("../utils/email.util");
 const router = express.Router();
 
