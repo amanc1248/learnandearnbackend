@@ -19,7 +19,4 @@ router.post("/", checkUserIfExists, createUser);
 router.post("/sendEmail", sendEmail);
 router.get("/login", userLogin, validateUserPassword, generateJwtToken);
 router.put("/resetPassword",checkIfUserExistsForResetingPassword,changeUserPassword);
-router.get("/test", authenticateToken, (req, res, next) => {
-  res.send("test success");
-});
 module.exports = router;
