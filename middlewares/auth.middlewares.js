@@ -10,11 +10,9 @@ const authenticateToken = async (req, res, next) => {
       return res.status(401).send("no token");
     } else {
       jwt.verify(token, process.env.JWT_SECRET_KEY, async (err, user) => {
-        if (err) {
-          return res.sendStatus(403);
-        }
+        if (err) return res.sendStatus(403);
         const { email } = user;
-        const data = await User.findOne({ email }, { email: 1 }).lean();
+        const data = await User.findOne({ email }, { email: 1, name: 1 }).lean();
         if (data) {
           req.user = data;
           next();

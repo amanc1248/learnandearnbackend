@@ -120,6 +120,18 @@ const changeUserPassword = async(req,res,next)=>{
     res.status(400).send(error);
   }
 }
+
+// send user details
+const sendUserDetails =  async(req,res,next)=>{
+  try{
+    const { user } = req;
+    // const {email, name, _id} = user;
+    return res.status(200).send(user)
+  }catch(error){
+    console.error(error);
+    res.status(400).send(error);
+  }
+}
 module.exports = {
   createUser,
   checkUserIfExists,
@@ -129,4 +141,5 @@ module.exports = {
   checkIfuserExistsBeforeSendingOTP,
   checkIfUserExistsForResetingPassword,
   changeUserPassword,
+  sendUserDetails,
 };
