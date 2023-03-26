@@ -36,8 +36,20 @@ const updateUserPassword = async({email, password})=>{
     throw new Error(error);
   }
 }
+
+const updateUserEmail = async({id, oldEmail, newEmail})=>{
+  try{
+    const updatedUser = await User.findOneAndUpdate({_id:id, email:oldEmail},{$set:{email:newEmail}}, {projection:{_id:1, email:1, name:1}, returnOriginal: false}).lean();
+    if(updatedUser) return updatedUser;
+    return null;
+  }catch(error){
+    console.error(error)
+    throw new Error(error);
+  }
+}
 module.exports = {
   findUserByEmail,
   saveUser,
   updateUserPassword,
+  updateUserEmail,
 };
