@@ -8,7 +8,6 @@ dotenv.config();
 const sendEmail = async ({ email }) => {
   try {
     const otp = await generateOTP();
-    console.log(otp)
     let transporter = nodemailer.createTransport({
       service: "gmail",
       auth: {
@@ -59,8 +58,6 @@ const generateOTP = () => {
       res.on("end", () => {
         expiryDate = new Date(JSON.parse(data).utc_datetime);
         expiryDate.setMinutes(expiryDate.getMinutes() + 5);
-        console.log(typeof(expiryDate))
-        console.log("Current UTC time:", expiryDate);
         resolve({ OTP, expiryDate });
       });
     });

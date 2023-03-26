@@ -16,7 +16,6 @@ const db = async()=>{
       const db = connection.db(process.env.DATABASE);
       return db;
     }else{
-      console.log("hel")
     }
   }catch(error){
     console.error(error);

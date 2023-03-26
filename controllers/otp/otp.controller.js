@@ -25,7 +25,6 @@ const saveOTP = (req,res,next) => {
     newOTP
       .save()
       .then(() => {
-        console.log("OTP saved successfully");
         res.send("success")
       })
       .catch((error) => {
