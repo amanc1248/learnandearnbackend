@@ -123,8 +123,8 @@ const checkIfUserExistsForResetingPassword = async (req, res, next) => {
   }
 };
 
-// change user password
-const changeUserPassword = async (req, res, next) => {
+// reset user password
+const resetUserPassword = async (req, res, next) => {
   try {
     const { email, password } = req.body;
     const hashedPassword = await generateHashedPassword({ password });
@@ -181,6 +181,22 @@ const generateJWTWhenChangedEmail = async(req, res, next)=>{
     res.status(400).send(error);
   }
 }
+
+// change user password
+const changeUserPassword =async(req,res,next)=>{
+  try{
+    const {email, newPassword, currentPassword} = req.body;
+    const user = await findUserByEmail({email});
+    if(!user) return res.status(400).send("user not found");
+    const isPasswordValid = await validatePassword({password: currentPassword, hashedPassword: user.password});
+    if(!isPasswordValid) return res.status(400).send("Current password is incorrect");
+    const updatedUserPassword = await updateUserPassword({email, password: newPassword});
+    if(!updatedUserPassword) return res.status(400).send("Something went wrong updating the password");
+    return res.status(201).send("success");
+  }catch(e){
+    return res.status(400).send(e);
+  }
+}
 module.exports = {
   createUser,
   checkUserIfExists,
@@ -189,8 +205,9 @@ module.exports = {
   generateJwtToken,
   checkIfuserExistsBeforeSendingOTP,
   checkIfUserExistsForResetingPassword,
-  changeUserPassword,
+  resetUserPassword,
   sendUserDetails,
   udpateUserEmail,
   generateJWTWhenChangedEmail,
+  changeUserPassword,
 };
