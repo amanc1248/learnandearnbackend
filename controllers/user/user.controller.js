@@ -1,13 +1,25 @@
-const { findUserByEmail, saveUser, updateUserPassword } = require("./user.subController");
-const { validatePassword, generateHashedPassword } = require("../../utils/password.util");
+const {
+  findUserByEmail,
+  saveUser,
+  updateUserPassword,
+  updateUserEmail,
+} = require("./user.subController");
+const {
+  validatePassword,
+  generateHashedPassword,
+} = require("../../utils/password.util");
 const { generateJwt } = require("../../utils/jwt.util");
 
-const createUser = async(req, res, next) => {
+const createUser = async (req, res, next) => {
   try {
     const { name, email, password } = req.body;
-    const hashedPassword = await generateHashedPassword({password});
-    const createdUser    = await saveUser({name, email, password: hashedPassword});
-    if(createdUser) return res.status(201).send("success");
+    const hashedPassword = await generateHashedPassword({ password });
+    const createdUser = await saveUser({
+      name,
+      email,
+      password: hashedPassword,
+    });
+    if (createdUser) return res.status(201).send("success");
   } catch (error) {
     res.status(500).send("error creating user");
   }
@@ -17,7 +29,7 @@ const createUser = async(req, res, next) => {
 const checkUserIfExists = async (req, res, next) => {
   try {
     const { email } = req.body;
-    const user = await findUserByEmail({email});
+    const user = await findUserByEmail({ email });
     if (user) {
       res.status(409).send("User already exists with this email address");
     } else {
@@ -32,7 +44,7 @@ const checkUserIfExists = async (req, res, next) => {
 const userLogin = async (req, res, next) => {
   try {
     const { email } = req.query;
-    const user = await findUserByEmail({email});
+    const user = await findUserByEmail({ email });
     if (user) {
       req.user = user;
       next();
@@ -40,7 +52,7 @@ const userLogin = async (req, res, next) => {
       res.status(404).send("User not found");
     }
   } catch (error) {
-    console.log(error)
+    console.log(error);
     res.status(400).send(error);
   }
 };
@@ -50,14 +62,17 @@ const validateUserPassword = async (req, res, next) => {
   try {
     const { password: hashedPassword } = req.user;
     const { password } = req.query;
-    const isPasswordValid = await validatePassword({password, hashedPassword});
+    const isPasswordValid = await validatePassword({
+      password,
+      hashedPassword,
+    });
     if (isPasswordValid) {
       next();
     } else {
       res.status(401).send("Invalid password");
     }
   } catch (error) {
-    console.error(error)
+    console.error(error);
     res.status(400).send(error);
   }
 };
@@ -67,8 +82,8 @@ const generateJwtToken = async (req, res, next) => {
   try {
     const { email } = req.query;
     const expiresIn = "1h";
-    const jwt = await generateJwt({email, expiresIn});
-    if(jwt){
+    const jwt = await generateJwt({ email, expiresIn });
+    if (jwt) {
       res.status(200).send(jwt);
     }
   } catch (error) {
@@ -81,23 +96,23 @@ const generateJwtToken = async (req, res, next) => {
 const checkIfuserExistsBeforeSendingOTP = async (req, res, next) => {
   try {
     const { email } = req.body;
-    const user = await findUserByEmail({email});
+    const user = await findUserByEmail({ email });
     if (user) {
       res.status(409).send("User already exists. Please login.");
     } else {
       next();
     }
   } catch (error) {
-    console.error(error)
+    console.error(error);
     res.status(400).send(error);
   }
 };
 
 // check if user exists or not before sending otp for resetting password
-const checkIfUserExistsForResetingPassword = async(req, res, next)=>{
+const checkIfUserExistsForResetingPassword = async (req, res, next) => {
   try {
     const { email } = req.body;
-    const user = await findUserByEmail({email});
+    const user = await findUserByEmail({ email });
     if (user) {
       next();
     } else {
@@ -106,27 +121,61 @@ const checkIfUserExistsForResetingPassword = async(req, res, next)=>{
   } catch (error) {
     res.status(400).send(error);
   }
-}
+};
 
 // change user password
-const changeUserPassword = async(req,res,next)=>{
-  try{
-    const {email, password} = req.body;
-    const hashedPassword = await generateHashedPassword({password});
-    const result         = await updateUserPassword({email, password: hashedPassword});
-    if(result) return res.status(200).send("success");
-  }catch(error){
+const changeUserPassword = async (req, res, next) => {
+  try {
+    const { email, password } = req.body;
+    const hashedPassword = await generateHashedPassword({ password });
+    const result = await updateUserPassword({
+      email,
+      password: hashedPassword,
+    });
+    if (result) return res.status(200).send("success");
+  } catch (error) {
     console.error(error);
     res.status(400).send(error);
   }
-}
+};
 
 // send user details
-const sendUserDetails =  async(req,res,next)=>{
-  try{
+const sendUserDetails = async (req, res, next) => {
+  try {
     const { user } = req;
-    // const {email, name, _id} = user;
-    return res.status(200).send(user)
+    return res.status(200).send(user);
+  } catch (error) {
+    console.error(error);
+    res.status(400).send(error);
+  }
+};
+
+// udpate user emial
+const udpateUserEmail = async (req, res, next) => {
+  try {
+    const { id, email, newEmail } = req.body;
+    const updatedUser = await updateUserEmail({ id, oldEmail:email, newEmail });
+    if (updatedUser){
+      req.updatedUser = updatedUser;
+      next();
+    };
+    return null;
+  } catch (error) {
+    console.error(error);
+    res.status(400).send(error);
+  }
+};
+
+// generate jwt when change email
+const generateJWTWhenChangedEmail = async(req, res, next)=>{
+  try{
+    const updatedUser = req.updatedUser;
+    const {email} = updatedUser;
+    const expiresIn = "1h";
+    const jwt = await generateJwt({ email, expiresIn });
+    if (jwt) {
+      res.status(200).send({jwt, updatedUser});
+    }
   }catch(error){
     console.error(error);
     res.status(400).send(error);
@@ -142,4 +191,6 @@ module.exports = {
   checkIfUserExistsForResetingPassword,
   changeUserPassword,
   sendUserDetails,
+  udpateUserEmail,
+  generateJWTWhenChangedEmail,
 };
