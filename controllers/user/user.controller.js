@@ -9,7 +9,9 @@ const {
   generateHashedPassword,
 } = require("../../utils/password.util");
 const { generateJwt } = require("../../utils/jwt.util");
+const { sendEmail } = require("../../utils/email.util");
 
+// create user
 const createUser = async (req, res, next) => {
   try {
     const { name, email, password } = req.body;
@@ -19,12 +21,27 @@ const createUser = async (req, res, next) => {
       email,
       password: hashedPassword,
     });
-    if (createdUser) return res.status(201).send("success");
+    if (createdUser) {
+      req.sendSlackInvitationDetails= {name, email};
+      next();
+    }
   } catch (error) {
     res.status(500).send("error creating user");
   }
 };
 
+// send email for slack invitation after creating user
+const sendSlackInvitationEmail = async(req,res,next)=>{
+  try{
+    const {name, email} = req.sendSlackInvitationDetails
+    const sentEmail = await sendEmail({email, subject:"Slack Invitation", emailText:`Hello ${name}! You are invited to join our slack channel`});
+    if (sentEmail){
+      return res.status(200).send("success");
+    }
+  }catch(error){
+    res.status(500).send("error creating user");
+  }
+}
 // get user
 const checkUserIfExists = async (req, res, next) => {
   try {
@@ -210,4 +227,5 @@ module.exports = {
   udpateUserEmail,
   generateJWTWhenChangedEmail,
   changeUserPassword,
+  sendSlackInvitationEmail,
 };
