@@ -5,9 +5,8 @@ const http = require("http");
 dotenv.config();
 
 // send email
-const sendEmail = async ({ email }) => {
+const sendEmail = async ({ email, subject, emailText }) => {
   try {
-    const otp = await generateOTP();
     let transporter = nodemailer.createTransport({
       service: "gmail",
       auth: {
@@ -18,15 +17,14 @@ const sendEmail = async ({ email }) => {
     let mailOptions = {
       from: process.env.EMAIL,
       to: email,
-      subject: "OTP verification",
-      text: "Your OTP is: " + otp.OTP,
+      subject: subject,
+      text: emailText,
     };
 
     const info = await transporter.sendMail(mailOptions);
     if (info) {
       console.log("Email sent: " + info.response);
-      otp.email = email;
-      return otp;
+      return "success";
     }
   } catch (error) {
     res.status(500).send("Internal Server Error");
@@ -72,4 +70,5 @@ const generateOTP = () => {
 };
 module.exports = {
   sendEmail,
+  generateOTP,
 };
