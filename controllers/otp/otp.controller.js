@@ -1,5 +1,5 @@
 const OTP = require("../../models/otp.model");
-const { sendEmail } = require("../../utils/email.util");
+const { sendEmail, generateOTP } = require("../../utils/email.util");
 const dotenv = require('dotenv');
 dotenv.config();
 
@@ -7,9 +7,11 @@ dotenv.config();
 const sendOTP = async (req,res,next) => {
   try {
     const {email} = req.body;
-    const otp = await sendEmail({email});
-    if(otp){
-      req.otp = otp;
+    const generatedOTP = await generateOTP();
+    const sentEmail = await sendEmail({email, subject:"OTP verfication", emailText:`Your otp is ${generatedOTP.OTP}`});
+    if(sentEmail){
+      const otpObj = {OTP:generatedOTP.OTP, expiryDate: generatedOTP.expiryDate, email:email}
+      req.otpObj= otpObj;
       next()
     }
   } catch (err) {
@@ -20,8 +22,8 @@ const sendOTP = async (req,res,next) => {
 // saving otp
 const saveOTP = (req,res,next) => {
   try {
-    const {otp} = req;
-    const newOTP = new OTP(otp);
+    const {otpObj} = req;
+    const newOTP = new OTP(otpObj);
     newOTP
       .save()
       .then(() => {
