@@ -11,13 +11,14 @@ const {
   udpateUserEmail,
   generateJWTWhenChangedEmail,
   changeUserPassword,
+  sendSlackInvitationEmail,
 } = require("../controllers/user/user.controller");
 const { authenticateToken } = require("../middlewares/auth.middlewares");
 const { sendEmail } = require("../utils/email.util");
 const router = express.Router();
 
 // creating user
-router.post("/", checkUserIfExists, createUser);
+router.post("/", checkUserIfExists, createUser, sendSlackInvitationEmail);
 
 
 router.post("/sendEmail", sendEmail);
