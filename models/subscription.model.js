@@ -17,6 +17,10 @@ const SubscriptionSchema = new mongoose.Schema({
         type: String,
         required: true,
     },
+    isSubscriptionActive: {
+        type: Boolean,
+        required: true,
+    },
     paymentId: {
         type: mongoose.Schema.Types.ObjectId,
         ref: "Payment",
