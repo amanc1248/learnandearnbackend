@@ -27,6 +27,30 @@ const PaymentSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
+    fullName: {
+      type: String,
+      required: true,
+    },
+    paymentImage: {
+      type: String,
+      required: true,
+    },
+    billingAddress: {
+      type: String,
+      required: true,
+    },
+    bankName: {
+      type: String,
+      optional: true,
+    },
+    walletName: {
+      type: String,
+      optional: true,
+    },
+    bankAccountNumber: {
+      type: String,
+      optional: true,
+    },
     status: {
       type: String,
       required: true,
