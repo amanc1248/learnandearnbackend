@@ -51,12 +51,22 @@ const PaymentSchema = new mongoose.Schema(
       type: String,
       optional: true,
     },
-    status: {
-      type: String,
+    paid: {
+      type: Boolean,
       required: true,
+      default: false,
     },
     transactionId: {
       type: String,
+      required: true,
+    },
+    reviewStatus:{
+      type: String,
+      required: true,
+      default:"inReview"
+    },
+    paymentDate:{
+      type: Date,
       required: true,
     },
     additionalInformation: {
