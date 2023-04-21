@@ -1,3 +1,4 @@
+const { uploadImageUtil } = require("../../utils/image.utils");
 const { paymentSubController } = require("./payment.subController");
 
 // add payment
@@ -25,7 +26,7 @@ const createPayment = async (req, res, next) => {
       additionalInformation,
       userId: _id,
     };
-    paymentObject.paymentImage = "paymentImage";
+    paymentObject.paymentImage = paymentImage;
     paymentObject.paymentId = "paymentId";
     paymentObject.transactionId = "transactionId";
     paymentObject.date = new Date();

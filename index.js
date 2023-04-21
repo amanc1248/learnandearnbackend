@@ -10,7 +10,7 @@ const cors = require("cors");
 const { authenticateToken } = require("./middlewares/auth.middlewares");
 dotenv.config();
 
-const port = process.env.PORT || 8081;
+const port = process.env.PORT || 8082;
 
 app.use(bodyParser.json())
 app.use(cors());
