@@ -1,8 +1,17 @@
 const express = require("express");
-const { createPayment } = require("../controllers/payment/payment.controller");
+const multer = require('multer');
+
+const { createPayment, getPaymentByUserIdReviewStatus, getAllPayments } = require("../controllers/payment/payment.controller");
 const { checkSubscription } = require("../controllers/subscription/subscription.controller");
-const { upload } = require("../middlewares/image.middlewares");
+const { uploadImageMiddleware } = require("../middlewares/image.middlewares");
+
+const upload = multer({ dest:"/uploads" });
 const router = express.Router();
 
-router.post("/", checkSubscription,upload.single('file'), createPayment)
+// for creating payment when user is submitting payment request
+router.post("/",checkSubscription, upload.single('paymentImage'),uploadImageMiddleware, createPayment);
+
+// fetching payment of a user
+router.get("/user", getPaymentByUserIdReviewStatus)
+router.get("/all", getAllPayments)
 module.exports = router;

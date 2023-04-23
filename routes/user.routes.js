@@ -15,10 +15,11 @@ const {
 } = require("../controllers/user/user.controller");
 const { authenticateToken } = require("../middlewares/auth.middlewares");
 const { sendEmail } = require("../utils/email.util");
+const { createSubscriptionAfterCreatingUser } = require("../controllers/subscription/subscription.controller");
 const router = express.Router();
 
 // creating user
-router.post("/", checkUserIfExists, createUser, sendSlackInvitationEmail);
+router.post("/", checkUserIfExists, createUser, createSubscriptionAfterCreatingUser, sendSlackInvitationEmail);
 
 
 router.post("/sendEmail", sendEmail);

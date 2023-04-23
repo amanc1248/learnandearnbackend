@@ -22,7 +22,8 @@ const createUser = async (req, res, next) => {
       password: hashedPassword,
     });
     if (createdUser) {
-      req.sendSlackInvitationDetails= {name, email};
+      const {name, email, _id} = createdUser._doc;
+      req.user= {name, email,_id};
       next();
     }
   } catch (error) {
@@ -33,7 +34,7 @@ const createUser = async (req, res, next) => {
 // send email for slack invitation after creating user
 const sendSlackInvitationEmail = async(req,res,next)=>{
   try{
-    const {name, email} = req.sendSlackInvitationDetails
+    const {name, email} = req.user
     const sentEmail = await sendEmail({email, subject:"Slack Invitation", emailText:`Hello ${name}! You are invited to join our slack channel`});
     if (sentEmail){
       return res.status(200).send("success");

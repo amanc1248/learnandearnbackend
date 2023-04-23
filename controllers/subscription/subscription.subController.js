@@ -11,13 +11,10 @@ const subscriptionSubController = {
     }
   },
 
-  // find subscription userId
-  findByUserId: async ({ userId }) => {
+  // find one
+  findOne: async ({ criteria }) => {
     try {
-      const subscription = await SubscriptionModel.findOne({
-        userId,
-        isSubscriptionActive: true,
-      }).lean();
+      const subscription = await SubscriptionModel.findOne(criteria).lean();
       if (!subscription) return null;
       return subscription;
     } catch (error) {

@@ -13,7 +13,30 @@ const paymentSubController = {
       throw new Error(error);
     }
   },
+
+  // findOne and review status
+  findOne: async({criteria})=>{
+    try{
+      const payment = await PaymentModel.findOne(criteria).lean();
+      return payment;
+    }catch(e){
+      console.log(e)
+      throw new Error(e)
+    }
+  },
+
+  // find
+  find: async({criteria})=>{
+    try{
+      const payment = await PaymentModel.find(criteria).lean();
+      return payment;
+    }catch(e){
+      console.error(e);
+      throw new Error(e);
+    }
+  }
 };
+
 module.exports = {
   paymentSubController,
 };

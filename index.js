@@ -5,6 +5,7 @@ const database = require("./database/database");
 const userRouter = require("./routes/user.routes.js")
 const otpRouter = require("./routes/otp.routes.js")
 const paymentRouter = require("./routes/payment.routes.js")
+const subscriptionRouter =require("./routes/susbscription.routes");
 const bodyParser = require("body-parser");
 const cors = require("cors");
 const { authenticateToken } = require("./middlewares/auth.middlewares");
@@ -21,6 +22,7 @@ app.use("/user",userRouter)
 app.use("/otp",otpRouter)
 
 app.use("/payment",authenticateToken, paymentRouter)
+app.use("/subscription",authenticateToken,subscriptionRouter)
 app.listen(port, () => {
   console.log(`Server started on port ${port}`);
 });

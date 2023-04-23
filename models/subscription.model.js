@@ -13,7 +13,7 @@ const SubscriptionSchema = new mongoose.Schema({
         type: Number,
         required: true,
     },
-    susbcriptionType: {
+    subscriptionType: {
         type: String,
         required: true,
     },
@@ -24,7 +24,7 @@ const SubscriptionSchema = new mongoose.Schema({
     paymentId: {
         type: mongoose.Schema.Types.ObjectId,
         ref: "Payment",
-        required: true,
+        optional: true,
     },
     userId: {
         type: mongoose.Schema.Types.ObjectId,
