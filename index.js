@@ -24,5 +24,5 @@ app.use("/otp",otpRouter)
 app.use("/payment",authenticateToken, paymentRouter)
 app.use("/subscription",authenticateToken,subscriptionRouter)
 app.listen(port, () => {
-  console.log(`Server started on port ${port}`);
+  console.log(`Server started at port ${port}`);
 });
