@@ -19,8 +19,9 @@ const storage = new CloudinaryStorage({
 
 const uploadImageMiddleware = async (req, res, next) => {
   try {
-    const image = req.file;
-    cloudinary.uploader.upload(image.path, (error, result) => {
+    const buffer = req.file.buffer;
+    const base64 = buffer.toString('base64');
+    cloudinary.uploader.upload(`data:image/png;base64,${base64}`, (error, result) => {
       if (error) {
         console.error(error);
         return res.status(500).send("There was an error uploading the image.");

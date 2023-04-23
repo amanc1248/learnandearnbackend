@@ -5,7 +5,9 @@ const { createPayment, getPaymentByUserIdReviewStatus, getAllPayments } = requir
 const { checkSubscription } = require("../controllers/subscription/subscription.controller");
 const { uploadImageMiddleware } = require("../middlewares/image.middlewares");
 
-const upload = multer({ dest:"/uploads" });
+const storage = multer.memoryStorage();
+const upload = multer({ storage: storage });
+
 const router = express.Router();
 
 // for creating payment when user is submitting payment request
