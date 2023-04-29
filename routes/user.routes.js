@@ -16,14 +16,15 @@ const {
 const { authenticateToken } = require("../middlewares/auth.middlewares");
 const { sendEmail } = require("../utils/email.util");
 const { createSubscriptionAfterCreatingUser } = require("../controllers/subscription/subscription.controller");
+const { waitFunction } = require("../utils/test.util");
 const router = express.Router();
 
 // creating user
-router.post("/", checkUserIfExists, createUser, createSubscriptionAfterCreatingUser, sendSlackInvitationEmail);
+router.post("/",waitFunction, checkUserIfExists, createUser, createSubscriptionAfterCreatingUser, sendSlackInvitationEmail);
 
 
 router.post("/sendEmail", sendEmail);
-router.get("/login", userLogin, validateUserPassword, generateJwtToken);
+router.get("/login", waitFunction, userLogin, validateUserPassword, generateJwtToken);
 router.put("/resetPassword",checkIfUserExistsForResetingPassword,resetUserPassword);
 router.get("/checkLogin", authenticateToken, sendUserDetails);
 router.put("/changeEmail", authenticateToken, udpateUserEmail, generateJWTWhenChangedEmail);
