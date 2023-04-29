@@ -70,7 +70,8 @@ const getPaymentByUserIdReviewStatus = async (req, res, next) => {
 const getAllPayments = async (req, res, next) => {
   try {
     const {_id} = req.user;
-    const payment = await paymentSubController.find({userId: _id});
+    const criteria ={userId: _id, paid:true};
+    const payment = await paymentSubController.find({criteria});
     return res.status(200).send(payment);
   } catch (e) {
     console.error(e)
