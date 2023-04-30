@@ -1,5 +1,5 @@
-const OTP = require("../../models/otp.model");
-const { sendEmail, generateOTP } = require("../../utils/email.util");
+const OTP = require("../models/otp.model");
+const { sendEmail, generateOTP } = require("../utils/email.util");
 const dotenv = require('dotenv');
 dotenv.config();
 

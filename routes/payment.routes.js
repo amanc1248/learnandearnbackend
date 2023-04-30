@@ -1,10 +1,10 @@
 const express = require("express");
 const multer = require('multer');
 
-const { createPayment, getPaymentByUserIdReviewStatus, getAllPayments } = require("../controllers/payment/payment.controller");
-const { checkSubscription } = require("../controllers/subscription/subscription.controller");
 const { uploadImageMiddleware } = require("../middlewares/image.middlewares");
 const { waitFunction } = require("../utils/test.util");
+const { checkSubscription } = require("../controllers/subscription.controller");
+const { createPayment, getPaymentByUserIdReviewStatus, getAllPayments } = require("../controllers/payment.controller");
 
 const storage = multer.memoryStorage();
 const upload = multer({ storage: storage });

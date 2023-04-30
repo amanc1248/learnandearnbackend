@@ -1,5 +1,5 @@
-const SubscriptionModel = require("../../models/subscription.model");
-const subscriptionSubController = {
+const SubscriptionModel = require("../models/subscription.model");
+const subscriptionQueries = {
   // save subscription
   save: async ({ obj }) => {
     try {
@@ -23,5 +23,5 @@ const subscriptionSubController = {
   },
 };
 module.exports ={
-  subscriptionSubController
+  subscriptionQueries,
 }

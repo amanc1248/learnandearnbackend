@@ -1,9 +1,9 @@
-const { subscriptionSubController } = require("./subscription.subController");
+const { subscriptionQueries } = require("../queries/subscription.queries");
 
 const checkSubscription = async (req, res, next) => {
   try {
     const { _id } = req.user;
-    const subscription = await subscriptionSubController.findOne({
+    const subscription = await subscriptionQueries.findOne({
       criteria: {
         userId: _id,
         isSubscriptionActive: true,
@@ -29,7 +29,7 @@ const createSubscriptionAfterCreatingUser = async (req, res, next) => {
       isSubscriptionActive: true,
       userId: req.user._id,
     };
-    const createdSubscription = await subscriptionSubController.save({
+    const createdSubscription = await subscriptionQueries.save({
       obj: subscriptionObject,
     });
     if (!createdSubscription)
@@ -46,7 +46,7 @@ const createSubscriptionAfterCreatingUser = async (req, res, next) => {
 const getAllActiveSubscriptionOfTheUser = async (req, res, next) => {
   try {
     const { _id } = req.user;
-    const subscriptions = await subscriptionSubController.findOne({
+    const subscriptions = await subscriptionQueries.findOne({
       criteria: {
         userId: _id,
         isSubscriptionActive: true,

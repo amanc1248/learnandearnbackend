@@ -1,5 +1,5 @@
-const { uploadImageUtil } = require("../../utils/image.utils");
-const { paymentSubController } = require("./payment.subController");
+const { paymentQueries } = require("../queries/payment.queries");
+const { uploadImageUtil } = require("../utils/image.utils");
 
 // add payment
 const createPayment = async (req, res, next) => {
@@ -39,7 +39,7 @@ const createPayment = async (req, res, next) => {
       paymentObject.walletName = walletName;
     }
 
-    const createdPayment = await paymentSubController.save({ paymentObject });
+    const createdPayment = await paymentQueries.save({ paymentObject });
     if (!createdPayment)
       return res.status(400).send("Something went wrong creating payment");
     return res.status(200).send("success");
@@ -54,7 +54,7 @@ const getPaymentByUserIdReviewStatus = async (req, res, next) => {
   try {
     const { _id: userId } = req.user;
     const reviewStatus = "inReview";
-    const payment = await paymentSubController.findOne({
+    const payment = await paymentQueries.findOne({
       userId,
       reviewStatus,
     });
@@ -71,7 +71,7 @@ const getAllPayments = async (req, res, next) => {
   try {
     const {_id} = req.user;
     const criteria ={userId: _id, paid:true};
-    const payment = await paymentSubController.find({criteria});
+    const payment = await paymentQueries.find({criteria});
     return res.status(200).send(payment);
   } catch (e) {
     console.error(e)

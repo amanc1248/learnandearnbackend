@@ -1,26 +1,22 @@
 const {
-  findUserByEmail,
-  saveUser,
-  updateUserPassword,
-  updateUserEmail,
-} = require("./user.subController");
-const {
   validatePassword,
   generateHashedPassword,
-} = require("../../utils/password.util");
-const { generateJwt } = require("../../utils/jwt.util");
-const { sendEmail } = require("../../utils/email.util");
+} = require("../utils/password.util");
+const { generateJwt } = require("../utils/jwt.util");
+const { sendEmail } = require("../utils/email.util");
+const { userQueries } = require("../queries/user.queries");
 
 // create user
 const createUser = async (req, res, next) => {
   try {
     const { name, email, password } = req.body;
     const hashedPassword = await generateHashedPassword({ password });
-    const createdUser = await saveUser({
+    const userObj = {
       name,
       email,
       password: hashedPassword,
-    });
+    };
+    const createdUser = await userQueries.save({userObj});
     if (createdUser) {
       const {name, email, _id} = createdUser._doc;
       req.user= {name, email,_id};
@@ -47,13 +43,15 @@ const sendSlackInvitationEmail = async(req,res,next)=>{
 const checkUserIfExists = async (req, res, next) => {
   try {
     const { email } = req.body;
-    const user = await findUserByEmail({ email });
+    const criteria = {email};
+    const user = await userQueries.findOne({criteria });
     if (user) {
       res.status(409).send("User already exists with this email address");
     } else {
       next();
     }
   } catch (error) {
+    console.error(error)
     res.status(400).send(error);
   }
 };
@@ -62,7 +60,8 @@ const checkUserIfExists = async (req, res, next) => {
 const userLogin = async (req, res, next) => {
   try {
     const { email } = req.query;
-    const user = await findUserByEmail({ email });
+    const criteria = {email};
+    const user = await userQueries.findOne({criteria });
     if (user) {
       req.user = user;
       next();
@@ -114,7 +113,8 @@ const generateJwtToken = async (req, res, next) => {
 const checkIfuserExistsBeforeSendingOTP = async (req, res, next) => {
   try {
     const { email } = req.body;
-    const user = await findUserByEmail({ email });
+    const criteria = {email}
+    const user = await userQueries.findOne({criteria});
     if (user) {
       res.status(409).send("User already exists. Please login.");
     } else {
@@ -130,13 +130,15 @@ const checkIfuserExistsBeforeSendingOTP = async (req, res, next) => {
 const checkIfUserExistsForResetingPassword = async (req, res, next) => {
   try {
     const { email } = req.body;
-    const user = await findUserByEmail({ email });
+    const criteria  ={email}
+    const user = await userQueries.findOne({criteria });
     if (user) {
       next();
     } else {
       res.status(409).send("User does not exist with that email address");
     }
   } catch (error) {
+    console.error(error)
     res.status(400).send(error);
   }
 };
@@ -146,10 +148,9 @@ const resetUserPassword = async (req, res, next) => {
   try {
     const { email, password } = req.body;
     const hashedPassword = await generateHashedPassword({ password });
-    const result = await updateUserPassword({
-      email,
-      password: hashedPassword,
-    });
+    const filter = {email};
+    const updateObj = {password: hashedPassword};
+    const result = await userQueries.updateOne({filter, updateObj});
     if (result) return res.status(200).send("success");
   } catch (error) {
     console.error(error);
@@ -172,7 +173,9 @@ const sendUserDetails = async (req, res, next) => {
 const udpateUserEmail = async (req, res, next) => {
   try {
     const { id, email, newEmail } = req.body;
-    const updatedUser = await updateUserEmail({ id, oldEmail:email, newEmail });
+    const filter = {_id:id, email};
+    const updateObj = {email:newEmail};
+    const updatedUser = await userQueries.updateOne({filter, updateObj });
     if (updatedUser){
       req.updatedUser = updatedUser;
       next();
@@ -204,14 +207,19 @@ const generateJWTWhenChangedEmail = async(req, res, next)=>{
 const changeUserPassword =async(req,res,next)=>{
   try{
     const {email, newPassword, currentPassword} = req.body;
-    const user = await findUserByEmail({email});
+    const criteria = {email}
+    const user = await userQueries.findOne({criteria});
     if(!user) return res.status(400).send("user not found");
     const isPasswordValid = await validatePassword({password: currentPassword, hashedPassword: user.password});
     if(!isPasswordValid) return res.status(400).send("Current password is incorrect");
-    const updatedUserPassword = await updateUserPassword({email, password: newPassword});
+    const hashedPassword = await generateHashedPassword({ password:newPassword });
+    const updateCriteria = {email};
+    const updateObj = {password: hashedPassword};
+    const updatedUserPassword = await userQueries.updateOne({filter: updateCriteria, updateObj});
     if(!updatedUserPassword) return res.status(400).send("Something went wrong updating the password");
     return res.status(201).send("success");
   }catch(e){
+    console.error(error)
     return res.status(400).send(e);
   }
 }

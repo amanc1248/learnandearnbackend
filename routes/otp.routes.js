@@ -1,7 +1,7 @@
 const express = require("express");
-const { sendOTP, saveOTP, getOTP, verifyOTP } = require("../controllers/otp/otp.controller");
-const { checkIfuserExistsBeforeSendingOTP, checkIfUserExistsForResetingPassword } = require("../controllers/user/user.controller");
 const { authenticateToken } = require("../middlewares/auth.middlewares");
+const { checkIfuserExistsBeforeSendingOTP, checkIfUserExistsForResetingPassword } = require("../controllers/user.controller");
+const { sendOTP, saveOTP, verifyOTP, getOTP } = require("../controllers/otp.controller");
 const router = express.Router();
 
 router

@@ -1,22 +1,10 @@
 const express = require("express");
-const {
-  createUser,
-  checkUserIfExists,
-  userLogin,
-  validateUserPassword,
-  generateJwtToken,
-  checkIfUserExistsForResetingPassword,
-  resetUserPassword,
-  sendUserDetails,
-  udpateUserEmail,
-  generateJWTWhenChangedEmail,
-  changeUserPassword,
-  sendSlackInvitationEmail,
-} = require("../controllers/user/user.controller");
+
 const { authenticateToken } = require("../middlewares/auth.middlewares");
 const { sendEmail } = require("../utils/email.util");
-const { createSubscriptionAfterCreatingUser } = require("../controllers/subscription/subscription.controller");
 const { waitFunction } = require("../utils/test.util");
+const { checkUserIfExists, createUser, sendSlackInvitationEmail, userLogin, validateUserPassword, generateJwtToken, resetUserPassword, checkIfUserExistsForResetingPassword, sendUserDetails, udpateUserEmail, generateJWTWhenChangedEmail, changeUserPassword } = require("../controllers/user.controller");
+const { createSubscriptionAfterCreatingUser } = require("../controllers/subscription.controller");
 const router = express.Router();
 
 // creating user
@@ -28,5 +16,8 @@ router.get("/login", waitFunction, userLogin, validateUserPassword, generateJwtT
 router.put("/resetPassword",checkIfUserExistsForResetingPassword,resetUserPassword);
 router.get("/checkLogin", authenticateToken, sendUserDetails);
 router.put("/changeEmail", authenticateToken, udpateUserEmail, generateJWTWhenChangedEmail);
-router.put("/changePassword", authenticateToken, changeUserPassword)
+router.put("/changePassword", authenticateToken, changeUserPassword);
+
+// admin routes
+router.get("/adminLogin")
 module.exports = router;

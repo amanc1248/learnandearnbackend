@@ -1,5 +1,5 @@
-const PaymentModel = require("../../models/payment.model");
-const paymentSubController = {
+const PaymentModel = require("../models/payment.model");
+const paymentQueries = {
   // save payment
   save: async ({ paymentObject }) => {
     try {
@@ -38,5 +38,5 @@ const paymentSubController = {
 };
 
 module.exports = {
-  paymentSubController,
+  paymentQueries,
 };
