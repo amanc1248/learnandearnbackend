@@ -3,7 +3,7 @@ const express = require("express");
 const { authenticateToken } = require("../middlewares/auth.middlewares");
 const { sendEmail } = require("../utils/email.util");
 const { waitFunction } = require("../utils/test.util");
-const { checkUserIfExists, createUser, sendSlackInvitationEmail, userLogin, validateUserPassword, generateJwtToken, resetUserPassword, checkIfUserExistsForResetingPassword, sendUserDetails, udpateUserEmail, generateJWTWhenChangedEmail, changeUserPassword } = require("../controllers/user.controller");
+const { checkUserIfExists, createUser, sendSlackInvitationEmail, userLogin, validateUserPassword, generateJwtToken, resetUserPassword, checkIfUserExistsForResetingPassword, sendUserDetails, udpateUserEmail, generateJWTWhenChangedEmail, changeUserPassword, adminLogin } = require("../controllers/user.controller");
 const { createSubscriptionAfterCreatingUser } = require("../controllers/subscription.controller");
 const router = express.Router();
 
@@ -19,5 +19,5 @@ router.put("/changeEmail", authenticateToken, udpateUserEmail, generateJWTWhenCh
 router.put("/changePassword", authenticateToken, changeUserPassword);
 
 // admin routes
-router.get("/adminLogin")
+router.get("/adminLogin", waitFunction, adminLogin, generateJwtToken)
 module.exports = router;

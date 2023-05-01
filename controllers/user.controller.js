@@ -223,6 +223,23 @@ const changeUserPassword =async(req,res,next)=>{
     return res.status(400).send(e);
   }
 }
+
+// admin login
+const adminLogin = async(req,res,next)=>{
+  try{
+    const {email, password} = req.query;
+    const criteria = {email, type:"admin"};
+    const user = await userQueries.findOne({criteria});
+    if(!user)return res.status(400).send("Admin does not exist")
+    const isPasswordValid = await validatePassword({password, hashedPassword:user.password});
+    if(!isPasswordValid) return res.status(400).send("Password did not match");
+    req.user = user;
+    return next();
+  }catch(e){
+    console.error(e);
+    res.status()
+  }
+}
 module.exports = {
   createUser,
   checkUserIfExists,
@@ -237,4 +254,5 @@ module.exports = {
   generateJWTWhenChangedEmail,
   changeUserPassword,
   sendSlackInvitationEmail,
+  adminLogin,
 };
