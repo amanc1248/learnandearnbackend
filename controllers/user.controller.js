@@ -5,6 +5,7 @@ const {
 const { generateJwt } = require("../utils/jwt.util");
 const { sendEmail } = require("../utils/email.util");
 const { userQueries } = require("../queries/user.queries");
+const mongoose  = require("mongoose");
 
 // create user
 const createUser = async (req, res, next) => {
@@ -16,10 +17,10 @@ const createUser = async (req, res, next) => {
       email,
       password: hashedPassword,
     };
-    const createdUser = await userQueries.save({userObj});
+    const createdUser = await userQueries.save({ userObj });
     if (createdUser) {
-      const {name, email, _id} = createdUser._doc;
-      req.user= {name, email,_id};
+      const { name, email, _id } = createdUser._doc;
+      req.user = { name, email, _id };
       next();
     }
   } catch (error) {
@@ -28,30 +29,34 @@ const createUser = async (req, res, next) => {
 };
 
 // send email for slack invitation after creating user
-const sendSlackInvitationEmail = async(req,res,next)=>{
-  try{
-    const {name, email} = req.user
-    const sentEmail = await sendEmail({email, subject:"Slack Invitation", emailText:`Hello ${name}! You are invited to join our slack channel`});
-    if (sentEmail){
+const sendSlackInvitationEmail = async (req, res, next) => {
+  try {
+    const { name, email } = req.user;
+    const sentEmail = await sendEmail({
+      email,
+      subject: "Slack Invitation",
+      emailText: `Hello ${name}! You are invited to join our slack channel`,
+    });
+    if (sentEmail) {
       return res.status(200).send("success");
     }
-  }catch(error){
+  } catch (error) {
     res.status(500).send("error creating user");
   }
-}
+};
 // get user
 const checkUserIfExists = async (req, res, next) => {
   try {
     const { email } = req.body;
-    const criteria = {email};
-    const user = await userQueries.findOne({criteria });
+    const criteria = { email };
+    const user = await userQueries.findOne({ criteria });
     if (user) {
       res.status(409).send("User already exists with this email address");
     } else {
       next();
     }
   } catch (error) {
-    console.error(error)
+    console.error(error);
     res.status(400).send(error);
   }
 };
@@ -60,8 +65,8 @@ const checkUserIfExists = async (req, res, next) => {
 const userLogin = async (req, res, next) => {
   try {
     const { email } = req.query;
-    const criteria = {email};
-    const user = await userQueries.findOne({criteria });
+    const criteria = { email };
+    const user = await userQueries.findOne({ criteria });
     if (user) {
       req.user = user;
       next();
@@ -113,8 +118,8 @@ const generateJwtToken = async (req, res, next) => {
 const checkIfuserExistsBeforeSendingOTP = async (req, res, next) => {
   try {
     const { email } = req.body;
-    const criteria = {email}
-    const user = await userQueries.findOne({criteria});
+    const criteria = { email };
+    const user = await userQueries.findOne({ criteria });
     if (user) {
       res.status(409).send("User already exists. Please login.");
     } else {
@@ -130,15 +135,15 @@ const checkIfuserExistsBeforeSendingOTP = async (req, res, next) => {
 const checkIfUserExistsForResetingPassword = async (req, res, next) => {
   try {
     const { email } = req.body;
-    const criteria  ={email}
-    const user = await userQueries.findOne({criteria });
+    const criteria = { email };
+    const user = await userQueries.findOne({ criteria });
     if (user) {
       next();
     } else {
       res.status(409).send("User does not exist with that email address");
     }
   } catch (error) {
-    console.error(error)
+    console.error(error);
     res.status(400).send(error);
   }
 };
@@ -148,9 +153,9 @@ const resetUserPassword = async (req, res, next) => {
   try {
     const { email, password } = req.body;
     const hashedPassword = await generateHashedPassword({ password });
-    const filter = {email};
-    const updateObj = {password: hashedPassword};
-    const result = await userQueries.updateOne({filter, updateObj});
+    const filter = { email };
+    const updateObj = { password: hashedPassword };
+    const result = await userQueries.updateOne({ filter, updateObj });
     if (result) return res.status(200).send("success");
   } catch (error) {
     console.error(error);
@@ -173,13 +178,13 @@ const sendUserDetails = async (req, res, next) => {
 const udpateUserEmail = async (req, res, next) => {
   try {
     const { id, email, newEmail } = req.body;
-    const filter = {_id:id, email};
-    const updateObj = {email:newEmail};
-    const updatedUser = await userQueries.updateOne({filter, updateObj });
-    if (updatedUser){
+    const filter = { _id: id, email };
+    const updateObj = { email: newEmail };
+    const updatedUser = await userQueries.updateOne({ filter, updateObj });
+    if (updatedUser) {
       req.updatedUser = updatedUser;
       next();
-    };
+    }
     return null;
   } catch (error) {
     console.error(error);
@@ -188,58 +193,113 @@ const udpateUserEmail = async (req, res, next) => {
 };
 
 // generate jwt when change email
-const generateJWTWhenChangedEmail = async(req, res, next)=>{
-  try{
+const generateJWTWhenChangedEmail = async (req, res, next) => {
+  try {
     const updatedUser = req.updatedUser;
-    const {email} = updatedUser;
+    const { email } = updatedUser;
     const expiresIn = "1h";
     const jwt = await generateJwt({ email, expiresIn });
     if (jwt) {
-      res.status(200).send({jwt, updatedUser});
+      res.status(200).send({ jwt, updatedUser });
     }
-  }catch(error){
+  } catch (error) {
     console.error(error);
     res.status(400).send(error);
   }
-}
+};
 
 // change user password
-const changeUserPassword =async(req,res,next)=>{
-  try{
-    const {email, newPassword, currentPassword} = req.body;
-    const criteria = {email}
-    const user = await userQueries.findOne({criteria});
-    if(!user) return res.status(400).send("user not found");
-    const isPasswordValid = await validatePassword({password: currentPassword, hashedPassword: user.password});
-    if(!isPasswordValid) return res.status(400).send("Current password is incorrect");
-    const hashedPassword = await generateHashedPassword({ password:newPassword });
-    const updateCriteria = {email};
-    const updateObj = {password: hashedPassword};
-    const updatedUserPassword = await userQueries.updateOne({filter: updateCriteria, updateObj});
-    if(!updatedUserPassword) return res.status(400).send("Something went wrong updating the password");
+const changeUserPassword = async (req, res, next) => {
+  try {
+    const { email, newPassword, currentPassword } = req.body;
+    const criteria = { email };
+    const user = await userQueries.findOne({ criteria });
+    if (!user) return res.status(400).send("user not found");
+    const isPasswordValid = await validatePassword({
+      password: currentPassword,
+      hashedPassword: user.password,
+    });
+    if (!isPasswordValid)
+      return res.status(400).send("Current password is incorrect");
+    const hashedPassword = await generateHashedPassword({
+      password: newPassword,
+    });
+    const updateCriteria = { email };
+    const updateObj = { password: hashedPassword };
+    const updatedUserPassword = await userQueries.updateOne({
+      filter: updateCriteria,
+      updateObj,
+    });
+    if (!updatedUserPassword)
+      return res.status(400).send("Something went wrong updating the password");
     return res.status(201).send("success");
-  }catch(e){
-    console.error(error)
+  } catch (e) {
+    console.error(error);
     return res.status(400).send(e);
   }
-}
+};
 
 // admin login
-const adminLogin = async(req,res,next)=>{
-  try{
-    const {email, password} = req.query;
-    const criteria = {email, type:"admin"};
-    const user = await userQueries.findOne({criteria});
-    if(!user)return res.status(400).send("Admin does not exist")
-    const isPasswordValid = await validatePassword({password, hashedPassword:user.password});
-    if(!isPasswordValid) return res.status(400).send("Password did not match");
+const adminLogin = async (req, res, next) => {
+  try {
+    const { email, password } = req.query;
+    const criteria = { email, type: "admin" };
+    const user = await userQueries.findOne({ criteria });
+    if (!user) return res.status(400).send("Admin does not exist");
+    const isPasswordValid = await validatePassword({
+      password,
+      hashedPassword: user.password,
+    });
+    if (!isPasswordValid) return res.status(400).send("Password did not match");
     req.user = user;
     return next();
-  }catch(e){
+  } catch (e) {
     console.error(e);
-    res.status()
+    res.status();
   }
-}
+};
+
+// get all users for admin
+const adminGetAllUsers = async (req, res, next) => {
+  try {
+    const criteria = {};
+  } catch (error) {}
+};
+
+// get full details of the user
+const getFullDetailsOfUser = async (req, res) => {
+  try {
+    const { userId } = req.query;
+    const aggregateArray =[
+      // Match the user based on user ID
+      { $match: { _id: mongoose.Types.ObjectId(userId) } },
+      // Join with the Payment collection to get all the payments made by the user
+      {
+        $lookup: {
+          from: "payments",
+          localField: "_id",
+          foreignField: "userId",
+          as: "payments",
+        },
+      },
+      // Join with the Subscription collection to get all the subscriptions made by the user
+      {
+        $lookup: {
+          from: "subscriptions",
+          localField: "_id",
+          foreignField: "userId",
+          as: "subscriptions",
+        },
+      },
+    ];    
+    const user = await userQueries.aggregate({aggregateArray})
+    if (!user) return res.status(400).send("User Details not found");
+    return res.status(200).send(user);
+  } catch (error) {
+    console.error(error);
+    throw new Error(error);
+  }
+};
 module.exports = {
   createUser,
   checkUserIfExists,
@@ -255,4 +315,5 @@ module.exports = {
   changeUserPassword,
   sendSlackInvitationEmail,
   adminLogin,
+  getFullDetailsOfUser,
 };

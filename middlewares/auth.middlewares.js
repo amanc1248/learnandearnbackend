@@ -23,6 +23,32 @@ const authenticateToken = async (req, res, next) => {
     }
   } catch (error) {}
 };
+
+// authenticate admin token
+const authenticateAdminToken = async(req,res,next)=>{
+  try{
+    const authHeader = req.headers["authorization"];
+    const token = authHeader && authHeader.split(" ")[1];
+    if (!token) {
+      return res.status(401).send("no token");
+    } else {
+      jwt.verify(token, process.env.JWT_SECRET_KEY, async (err, user) => {
+        if (err) return res.sendStatus(403);
+        const { email } = user;
+        const data = await User.findOne({ email, type:"admin" }, { email: 1, name: 1, _id:1 }).lean();
+        if (data) {
+          req.user = data;
+          next();
+        } else {
+          return res.status(403).send("invalid token");
+        }
+      });
+    }
+  }catch(error){
+    console.error(error)
+  }
+}
 module.exports = {
   authenticateToken,
+  authenticateAdminToken,
 };

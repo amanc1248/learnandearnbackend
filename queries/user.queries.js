@@ -1,3 +1,4 @@
+const { model } = require("mongoose");
 const User = require("../models/user.model");
 
 // const saveUser = ;
@@ -47,6 +48,17 @@ const userQueries = {
     }
   },
 
+  // find
+  find: async({criteria})=>{
+    try{
+      const users = await User.find(criteria).lean();
+      return users;
+    }catch(e){
+      console.error(e);
+      throw new Error(e)
+    }
+  },
+
   // update one
   updateOne: async({filter, updateObj})=>{
     try{
@@ -55,6 +67,29 @@ const userQueries = {
     }catch(error){
       console.error(error)
       throw new Error(error);
+    }
+  },
+
+  //  aggregate
+  aggregate: async({aggregateArray})=>{
+    try {
+      const user = await User.aggregate(aggregateArray);
+      if(!user.length)return null;  
+      return user[0];
+    } catch (error) {
+      
+    }
+  },
+
+  // findone with two populate
+  findOneWithTwoPopulate: async({filter, model1, model2})=>{
+    try{
+      const user = await User.findOne(filter).populate(model1).populate(model2).lean();
+      if(!user.length)return null;  
+      return user[0];
+    }catch(e){
+      console.error(e)
+      throw new Error(e)
     }
   }
 }
