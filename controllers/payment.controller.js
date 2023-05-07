@@ -68,7 +68,7 @@ const getPaymentByUserIdReviewStatus = async (req, res, next) => {
 };
 
 // get all payments of the user
-const getAllPayments = async (req, res, next) => {
+const getAllPaymentsOfTheUser = async (req, res, next) => {
   try {
     const {_id} = req.user;
     const criteria ={userId: _id, paid:true};
@@ -93,9 +93,21 @@ const getSinglePayment  = async(req,res,next)=>{
   }
 }
 
+// get all payments
+const getAllPayments = async(req,res,next)=>{
+  try {
+    const payments = await paymentQueries.findAllAndPopulate({populateField:"userId"});
+    if(!payments.length) return res.status(400).send("Payments not found");
+    return res.status(200).send(payments);
+  } catch (error) {
+    console.error(error)
+    res.status(400).send("Something went wrong fetching payments");
+  }
+}
 module.exports = {
   createPayment,
   getPaymentByUserIdReviewStatus,
-  getAllPayments,
+  getAllPaymentsOfTheUser,
   getSinglePayment,
+  getAllPayments,
 };

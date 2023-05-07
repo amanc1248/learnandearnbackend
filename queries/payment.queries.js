@@ -45,6 +45,17 @@ const paymentQueries = {
       console.error(error)
       throw new Error(error)
     }
+  },
+
+  // find all and populate
+  findAllAndPopulate: async({populateField})=>{
+    try {
+      const payments = await PaymentModel.find({}).populate(populateField).lean();
+      return payments;
+    } catch (error) {
+      console.error(error)
+      throw new Error(error)
+    }
   }
 };
 
