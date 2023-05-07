@@ -34,6 +34,17 @@ const paymentQueries = {
       console.error(e);
       throw new Error(e);
     }
+  },
+
+  // find by id
+  findByIdAndPopulate: async({id})=>{
+    try {
+      const payment = await PaymentModel.findById(id).populate("userId").lean();
+      return payment;
+    } catch (error) {
+      console.error(error)
+      throw new Error(error)
+    }
   }
 };
 

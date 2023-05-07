@@ -1,3 +1,4 @@
+const { default: mongoose } = require("mongoose");
 const SubscriptionModel = require("../models/subscription.model");
 const subscriptionQueries = {
   // save subscription
@@ -21,6 +22,17 @@ const subscriptionQueries = {
       throw new Error(error);
     }
   },
+
+  // find by id
+  findByIdAndPopulateUser: async({_id})=>{
+    try {
+      const subscription = await SubscriptionModel.findById(mongoose.Types.ObjectId(_id)).populate("userId").lean();
+      return subscription;
+    } catch (error) {
+      console.error(error)
+      throw new Error(error)
+    }
+  }
 };
 module.exports ={
   subscriptionQueries,

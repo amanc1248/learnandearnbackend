@@ -1,3 +1,4 @@
+const mongoose = require("mongoose");
 const { paymentQueries } = require("../queries/payment.queries");
 const { uploadImageUtil } = require("../utils/image.utils");
 
@@ -79,8 +80,22 @@ const getAllPayments = async (req, res, next) => {
   }
 };
 
+// get single payment
+const getSinglePayment  = async(req,res,next)=>{
+  try {
+    const {paymentId} = req.query;
+    const payment = await paymentQueries.findByIdAndPopulate({id:mongoose.Types.ObjectId(paymentId)});
+    if(!payment) return res.status(400).send("Payment not found")
+    return res.status(200).send(payment)
+  } catch (error) {
+    console.error(error)
+    res.status(400).send("Something went wrong fetching payment")
+  }
+}
+
 module.exports = {
   createPayment,
   getPaymentByUserIdReviewStatus,
   getAllPayments,
+  getSinglePayment,
 };

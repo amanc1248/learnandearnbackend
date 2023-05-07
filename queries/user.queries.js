@@ -80,18 +80,6 @@ const userQueries = {
       
     }
   },
-
-  // findone with two populate
-  findOneWithTwoPopulate: async({filter, model1, model2})=>{
-    try{
-      const user = await User.findOne(filter).populate(model1).populate(model2).lean();
-      if(!user.length)return null;  
-      return user[0];
-    }catch(e){
-      console.error(e)
-      throw new Error(e)
-    }
-  }
 }
 module.exports={
   userQueries

@@ -19,5 +19,4 @@ router.put("/changePassword", authenticateToken, changeUserPassword);
 
 // admin routes
 router.get("/adminLogin", waitFunction, adminLogin, generateJwtToken)
-router.get("/fullDetails", authenticateAdminToken, getFullDetailsOfUser )
 module.exports = router;

@@ -62,8 +62,22 @@ const getAllActiveSubscriptionOfTheUser = async (req, res, next) => {
       .send("Something went wrong fetching all active subscription.");
   }
 };
+
+// get subscription by id
+const getSubscriptionById = async(req,res,next)=>{
+  try {
+    const {subscriptionId} = req.query;
+    const subscription = await subscriptionQueries.findByIdAndPopulateUser({_id:subscriptionId});
+    if(!subscription) return res.status(400).send("Subscription not found");
+    return res.status(200).send(subscription);
+  } catch (error) {
+    console.error(error)
+    res.status(404).send("Something went wrong");
+  }
+}
 module.exports = {
   createSubscriptionAfterCreatingUser,
   checkSubscription,
   getAllActiveSubscriptionOfTheUser,
+  getSubscriptionById,
 };
