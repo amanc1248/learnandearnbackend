@@ -5,7 +5,7 @@ const {
 const { generateJwt } = require("../utils/jwt.util");
 const { sendEmail } = require("../utils/email.util");
 const { userQueries } = require("../queries/user.queries");
-const mongoose  = require("mongoose");
+const mongoose = require("mongoose");
 
 // create user
 const createUser = async (req, res, next) => {
@@ -262,7 +262,7 @@ const adminLogin = async (req, res, next) => {
 // get all users for admin
 const adminGetAllUsers = async (req, res, next) => {
   try {
-    const aggregateArray =[
+    const aggregateArray = [
       // Match the user based on user ID
       // Join with the Payment collection to get all the payments made by the user
       {
@@ -282,10 +282,22 @@ const adminGetAllUsers = async (req, res, next) => {
           as: "subscriptions",
         },
       },
-    ];    
-    const users = await userQueries.aggregate({aggregateArray})
-    if(!users.length) return res.status(400).send("Users not found");
-    return res.status(200).send(users)
+      {
+        $addFields: {
+          activeSubscriptions: {
+            $filter: {
+              input: "$subscriptions",
+              as: "subscription",
+              cond: {
+                $eq: ["$$subscription.isSubscriptionActive", true],
+              },
+            },
+          },
+        },}
+    ];
+    const users = await userQueries.aggregate({ aggregateArray });
+    if (!users.length) return res.status(400).send("Users not found");
+    return res.status(200).send(users);
   } catch (error) {}
 };
 
@@ -293,7 +305,7 @@ const adminGetAllUsers = async (req, res, next) => {
 const getFullDetailsOfUser = async (req, res) => {
   try {
     const { userId } = req.query;
-    const aggregateArray =[
+    const aggregateArray = [
       // Match the user based on user ID
       { $match: { _id: mongoose.Types.ObjectId(userId) } },
       // Join with the Payment collection to get all the payments made by the user
@@ -314,8 +326,8 @@ const getFullDetailsOfUser = async (req, res) => {
           as: "subscriptions",
         },
       },
-    ];    
-    const user = await userQueries.aggregate({aggregateArray})
+    ];
+    const user = await userQueries.aggregate({ aggregateArray });
     if (!user.length) return res.status(400).send("User Details not found");
     return res.status(200).send(user[0]);
   } catch (error) {
