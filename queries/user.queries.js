@@ -5,7 +5,7 @@ const User = require("../models/user.model");
 
 // const findUserByEmail = ;
 
-// const updateUserPassword = 
+// const updateUserPassword =
 
 // const updateUserEmail = async({id, oldEmail, newEmail})=>{
 //   try{
@@ -25,21 +25,24 @@ const User = require("../models/user.model");
 // };
 
 const userQueries = {
-  save: async ({userObj}) => {
+  save: async ({ userObj }) => {
     try {
       const newUser = new User(userObj);
       const createdUser = await newUser.save();
       if (createdUser) return createdUser;
     } catch (error) {
-      console.error(error)
+      console.error(error);
       throw new Error(error);
     }
   },
-  
+
   // find one
-  findOne: async ({criteria}) => {
+  findOne: async ({ criteria }) => {
     try {
-      const user = await User.findOne(criteria, { email: 1, password: 1 }).lean();
+      const user = await User.findOne(criteria, {
+        email: 1,
+        password: 1,
+      }).lean();
       if (user) return user;
       return null;
     } catch (error) {
@@ -49,38 +52,44 @@ const userQueries = {
   },
 
   // find
-  find: async({criteria})=>{
-    try{
+  find: async ({ criteria }) => {
+    try {
       const users = await User.find(criteria).lean();
       return users;
-    }catch(e){
+    } catch (e) {
       console.error(e);
-      throw new Error(e)
+      throw new Error(e);
     }
   },
 
   // update one
-  updateOne: async({filter, updateObj})=>{
-    try{
-      const result =  await User.findOneAndUpdate(filter,{$set: updateObj},{projection:{_id:1, email:1, name:1}, returnOriginal: false}).lean();
-      if(result) return result;
-    }catch(error){
-      console.error(error)
+  updateOne: async ({ filter, updateObj }) => {
+    try {
+      const result = await User.findOneAndUpdate(
+        filter,
+        { $set: updateObj },
+        { projection: { _id: 1, email: 1, name: 1 }, returnOriginal: false }
+      ).lean();
+      if (result) return result;
+    } catch (error) {
+      console.error(error);
       throw new Error(error);
     }
   },
 
   //  aggregate
-  aggregate: async({aggregateArray})=>{
+  aggregate: async ({ aggregateArray }) => {
     try {
-      const user = await User.aggregate(aggregateArray);
-      if(!user.length)return null;  
-      return user[0];
+      const users = await User.aggregate(aggregateArray);
+      return users;
     } catch (error) {
-      
+      console.error(error);
+      throw new Error(error);
     }
   },
-}
-module.exports={
-  userQueries
-}
+
+  
+};
+module.exports = {
+  userQueries,
+};

@@ -262,7 +262,30 @@ const adminLogin = async (req, res, next) => {
 // get all users for admin
 const adminGetAllUsers = async (req, res, next) => {
   try {
-    const criteria = {};
+    const aggregateArray =[
+      // Match the user based on user ID
+      // Join with the Payment collection to get all the payments made by the user
+      {
+        $lookup: {
+          from: "payments",
+          localField: "_id",
+          foreignField: "userId",
+          as: "payments",
+        },
+      },
+      // Join with the Subscription collection to get all the subscriptions made by the user
+      {
+        $lookup: {
+          from: "subscriptions",
+          localField: "_id",
+          foreignField: "userId",
+          as: "subscriptions",
+        },
+      },
+    ];    
+    const users = await userQueries.aggregate({aggregateArray})
+    if(!users.length) return res.status(400).send("Users not found");
+    return res.status(200).send(users)
   } catch (error) {}
 };
 
@@ -293,8 +316,8 @@ const getFullDetailsOfUser = async (req, res) => {
       },
     ];    
     const user = await userQueries.aggregate({aggregateArray})
-    if (!user) return res.status(400).send("User Details not found");
-    return res.status(200).send(user);
+    if (!user.length) return res.status(400).send("User Details not found");
+    return res.status(200).send(user[0]);
   } catch (error) {
     console.error(error);
     throw new Error(error);
@@ -316,4 +339,5 @@ module.exports = {
   sendSlackInvitationEmail,
   adminLogin,
   getFullDetailsOfUser,
+  adminGetAllUsers,
 };
