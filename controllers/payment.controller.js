@@ -31,8 +31,7 @@ const createPayment = async (req, res, next) => {
     paymentObject.transactionId = "transactionId";
     paymentObject.date = new Date();
     if (method === "bankTransfer") {
-      const { bankAccountNumber, bankName } = req.body;
-      paymentObject.bankAccountNumber = bankAccountNumber;
+      const { bankName } = req.body;
       paymentObject.bankName = bankName;
     }
     if (method === "walletTransfer") {
@@ -104,10 +103,27 @@ const getAllPayments = async(req,res,next)=>{
     res.status(400).send("Something went wrong fetching payments");
   }
 }
+
+// update payment by id
+const updatePaymentById = async(req,res,next)=>{
+  try {
+    const {reviewStatus, _id} = req.body;
+    const id = mongoose.Types.ObjectId(_id);
+    reviewStatus==='verified'? paid=true: paid=false;
+    const updateObj = {reviewStatus, paid};
+    const response = await paymentQueries.findByIdAndUpdate({id, updateObj});
+    if(!response) res.status(400).send("No updated payment");
+    res.status(200).send(response);
+  } catch (error) {
+    console.error(error)
+    res.status(400).send("Something went wrong updating payment")
+  }
+}
 module.exports = {
   createPayment,
   getPaymentByUserIdReviewStatus,
   getAllPaymentsOfTheUser,
   getSinglePayment,
   getAllPayments,
+  updatePaymentById,
 };

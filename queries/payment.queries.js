@@ -56,6 +56,17 @@ const paymentQueries = {
       console.error(error)
       throw new Error(error)
     }
+  },
+
+  // update by id;
+  findByIdAndUpdate: async({updateObj, id})=>{
+    try {
+      const response = await PaymentModel.findByIdAndUpdate(id,updateObj);
+      return response;
+    } catch (error) {
+      console.error(error)
+      throw new Error(error)
+    }
   }
 };
 

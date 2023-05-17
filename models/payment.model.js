@@ -47,10 +47,6 @@ const PaymentSchema = new mongoose.Schema(
       type: String,
       optional: true,
     },
-    bankAccountNumber: {
-      type: String,
-      optional: true,
-    },
     paid: {
       type: Boolean,
       required: true,

@@ -16,6 +16,8 @@ const createUser = async (req, res, next) => {
       name,
       email,
       password: hashedPassword,
+      joinedDate: new Date(),
+      type: "user",
     };
     const createdUser = await userQueries.save({ userObj });
     if (createdUser) {
@@ -264,6 +266,11 @@ const adminGetAllUsers = async (req, res, next) => {
   try {
     const aggregateArray = [
       // Match the user based on user ID
+      {
+        $match: {
+          type: "user"
+        }
+      },
       // Join with the Payment collection to get all the payments made by the user
       {
         $lookup: {
