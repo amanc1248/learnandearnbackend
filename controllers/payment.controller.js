@@ -1,6 +1,9 @@
 const mongoose = require("mongoose");
 const { paymentQueries } = require("../queries/payment.queries");
+const { subscriptionQueries } = require("../queries/subscription.queries");
 const { uploadImageUtil } = require("../utils/image.utils");
+const { sendEmail } = require("../utils/email.util");
+const { response } = require("express");
 
 // add payment
 const createPayment = async (req, res, next) => {
@@ -26,6 +29,7 @@ const createPayment = async (req, res, next) => {
       paymentImage: uploadedImageUrl,
       additionalInformation,
       userId: _id,
+      paymentStatusInformation: "Your payment is in review. We will let you know the status of your payment in email."
     };
     paymentObject.paymentId = "paymentId";
     paymentObject.transactionId = "transactionId";
@@ -42,7 +46,7 @@ const createPayment = async (req, res, next) => {
     const createdPayment = await paymentQueries.save({ paymentObject });
     if (!createdPayment)
       return res.status(400).send("Something went wrong creating payment");
-    return res.status(200).send("success");
+    next();
   } catch (error) {
     console.error(error);
     return res.status(404).send(error);
@@ -50,16 +54,36 @@ const createPayment = async (req, res, next) => {
 };
 
 // get paymentByUserId
-const getPaymentByUserIdReviewStatus = async (req, res, next) => {
+const getPaymentStatus = async (req, res, next) => {
   try {
-    const { _id: userId } = req.user;
-    const reviewStatus = "inReview";
-    const payment = await paymentQueries.findOne({
-      userId,
-      reviewStatus,
-    });
-    if (!payment) return res.status(200).send(null);
-    res.status(200).send(payment);
+    const {_id} = req.user;
+    const criteria = {userId:mongoose.Types.ObjectId(_id), isSubscriptionActive: true};
+    const subscription = await subscriptionQueries.findOne(criteria);
+
+    const paymentCriteria = {userId:mongoose.Types.ObjectId(_id), reviewStatus:"inReview"};
+    const payment = await paymentQueries.findOne({criteria: paymentCriteria});
+
+    // condition 1: when payment is in review and subscription is free
+    if(payment){
+      res.status(200).send({show: false, paymentStatusInformation:  payment?.paymentStatusInformation})
+    }
+    
+    // condition 2: when there is no payment and subscription is Pro
+    if(!payment && subscription.subscriptionType==="Pro"){
+      res.status(200).send({show: false})
+    }
+
+    if(!payment && subscription.subscriptionType==="Free"){
+      res.status(200).send({show: true});
+    }
+
+    // const { _id: userId } = req.user;
+
+    // const reviewStatus = "inReview";
+    // const payment = await paymentQueries.findOne({
+    //   userId,
+    //   reviewStatus,
+    // });
   } catch (e) {
     console.log(e);
     res.status(400).send("Something went wrong");
@@ -70,7 +94,7 @@ const getPaymentByUserIdReviewStatus = async (req, res, next) => {
 const getAllPaymentsOfTheUser = async (req, res, next) => {
   try {
     const {_id} = req.user;
-    const criteria ={userId: _id, paid:true};
+    const criteria ={userId: _id};
     const payment = await paymentQueries.find({criteria});
     return res.status(200).send(payment);
   } catch (e) {
@@ -119,11 +143,31 @@ const updatePaymentById = async(req,res,next)=>{
     res.status(400).send("Something went wrong updating payment")
   }
 }
+
+// send email after creating payment
+const sendEmailAfterCreatingPayment = async(req,res,next)=>{
+  try {
+    const {email, name} = req.user;
+    const subject = "Payment Received";
+    const emailText = `Dear, ${name}. 
+    We have received your payment and we will let you know the status of your payment by email.
+    Thank you for choosing us.
+    `
+    const response = await sendEmail({email, subject, emailText});
+    if(!response) res.status(400).send("Something went wrong sending email");
+    res.status(200).send("success");
+  } catch (error) {
+    console.error(error);
+    res.status(400).send(error);
+  }
+}
+
 module.exports = {
   createPayment,
-  getPaymentByUserIdReviewStatus,
+  getPaymentStatus,
   getAllPaymentsOfTheUser,
   getSinglePayment,
   getAllPayments,
   updatePaymentById,
+  sendEmailAfterCreatingPayment,
 };

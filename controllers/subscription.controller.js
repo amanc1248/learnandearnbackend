@@ -19,7 +19,7 @@ const checkSubscription = async (req, res, next) => {
   }
 };
 
-const createSubscriptionAfterCreatingUser = async (req, res, next) => {
+const createSubscription = async (req, res, next) => {
   try {
     const subscriptionObject = {
       subscriptionStartDate: new Date(),
@@ -50,7 +50,6 @@ const getAllActiveSubscriptionOfTheUser = async (req, res, next) => {
       criteria: {
         userId: _id,
         isSubscriptionActive: true,
-        subscriptionType: "Free",
       },
     });
     if (!subscriptions) return res.status(400).send("No active subscription");
@@ -76,7 +75,7 @@ const getSubscriptionById = async(req,res,next)=>{
   }
 }
 module.exports = {
-  createSubscriptionAfterCreatingUser,
+  createSubscription,
   checkSubscription,
   getAllActiveSubscriptionOfTheUser,
   getSubscriptionById,

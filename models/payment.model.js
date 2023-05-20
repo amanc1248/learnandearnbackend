@@ -61,6 +61,10 @@ const PaymentSchema = new mongoose.Schema(
       required: true,
       default:"inReview"
     },
+    paymentStatusInformation: {
+      type: String,
+      required: true,
+    },
     paymentDate:{
       type: Date,
       required: true,
@@ -68,9 +72,9 @@ const PaymentSchema = new mongoose.Schema(
     additionalInformation: {
       type: String,
       required: true,
-    },
+    }
   },
-  { timestamps: true }
+  { timestamps: true, }
 );
 
 const Payment = mongoose.model("Payment", PaymentSchema);

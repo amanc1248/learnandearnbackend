@@ -305,7 +305,9 @@ const adminGetAllUsers = async (req, res, next) => {
     const users = await userQueries.aggregate({ aggregateArray });
     if (!users.length) return res.status(400).send("Users not found");
     return res.status(200).send(users);
-  } catch (error) {}
+  } catch (error) {
+    console.error(error)
+  }
 };
 
 // get full details of the user
@@ -342,6 +344,34 @@ const getFullDetailsOfUser = async (req, res) => {
     throw new Error(error);
   }
 };
+
+// get user data
+const getUserData  = async(req,res,next)=>{
+  try {
+    const {_id} = req.user;
+    const user = await userQueries.findOne({criteria:mongoose.Types.ObjectId(_id)});
+    if(!user) return res.status(400).send("User not found");
+    return res.status(200).send(user);
+  } catch (error) {
+    console.error(error)
+    res.status(400).send("something went wrong");
+  }
+}
+
+// upgrade is upgradeable
+const updateIsUpgradeable = async(req,res,next)=>{
+  try {
+    const {_id} = req.user;
+    const filter = {_id: mongoose.Types.ObjectId(_id)};
+    const updateObj = {isUpgradable: false}
+    const user = await userQueries.updateOne({filter, updateObj});
+    if(!user) res.status(400).send("Something went wrong") 
+    next();
+  } catch (error) {
+    console.error(error)
+    throw new Error(error)
+  }
+}
 module.exports = {
   createUser,
   checkUserIfExists,
@@ -359,4 +389,6 @@ module.exports = {
   adminLogin,
   getFullDetailsOfUser,
   adminGetAllUsers,
+  getUserData,
+  updateIsUpgradeable,
 };

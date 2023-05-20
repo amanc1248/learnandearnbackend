@@ -27,8 +27,9 @@ const sendEmail = async ({ email, subject, emailText }) => {
       return "success";
     }
   } catch (error) {
-    res.status(500).send("Internal Server Error");
+    // res.status(500).send("Internal Server Error");
     console.log("erro: ",error)
+    throw new Error(error);
   }
 };
 
