@@ -8,6 +8,7 @@ const subscriptionQueries = {
       const createdSubscription = await subscription.save();
       if (createdSubscription) return createdSubscription;
     } catch (error) {
+      console.error(error)
       throw new Error(error);
     }
   },
@@ -30,6 +31,17 @@ const subscriptionQueries = {
       return subscription;
     } catch (error) {
       console.error(error)
+      throw new Error(error)
+    }
+  },
+
+  // update by id
+  findOneAndUpdate: async({condition, update})=>{
+    try {
+      const response = await SubscriptionModel.findOneAndUpdate(condition, {$set:update});
+      return response;
+    } catch (error) {
+      console.error(error);
       throw new Error(error)
     }
   }

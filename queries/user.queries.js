@@ -42,7 +42,7 @@ const userQueries = {
       const user = await User.findOne(criteria, {
         email: 1,
         password: 1,
-        isUpgradable: 1,
+        name:1, 
       }).lean();
       if (user) return user;
       return null;
@@ -69,7 +69,7 @@ const userQueries = {
       const result = await User.findOneAndUpdate(
         filter,
         { $set: updateObj },
-        { projection: { _id: 1, email: 1, name: 1, isUpgradable: 1 }, returnOriginal: false }
+        { projection: { _id: 1, email: 1, name: 1,}, returnOriginal: false }
       ).lean();
       if (result) return result;
     } catch (error) {

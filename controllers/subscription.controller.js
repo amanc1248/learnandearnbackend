@@ -19,13 +19,14 @@ const checkSubscription = async (req, res, next) => {
   }
 };
 
-const createSubscription = async (req, res, next) => {
+const createFreeSubscription = async (req, res, next) => {
   try {
     const subscriptionObject = {
       subscriptionStartDate: new Date(),
       subscriptionEndDate: new Date(),
       subscriptionAmount: 0,
       subscriptionType: "Free",
+      subscriptionItem: "Free Forever",
       isSubscriptionActive: true,
       userId: req.user._id,
     };
@@ -75,7 +76,7 @@ const getSubscriptionById = async(req,res,next)=>{
   }
 }
 module.exports = {
-  createSubscription,
+  createFreeSubscription,
   checkSubscription,
   getAllActiveSubscriptionOfTheUser,
   getSubscriptionById,

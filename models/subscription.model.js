@@ -13,6 +13,10 @@ const SubscriptionSchema = new mongoose.Schema({
         type: Number,
         required: true,
     },
+    subscriptionItem: {
+        type: String,
+        required: true,
+    },
     subscriptionType: {
         type: String,
         required: true,

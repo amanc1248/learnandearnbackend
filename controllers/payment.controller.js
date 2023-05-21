@@ -3,7 +3,7 @@ const { paymentQueries } = require("../queries/payment.queries");
 const { subscriptionQueries } = require("../queries/subscription.queries");
 const { uploadImageUtil } = require("../utils/image.utils");
 const { sendEmail } = require("../utils/email.util");
-const { response } = require("express");
+const { userQueries } = require("../queries/user.queries");
 
 // add payment
 const createPayment = async (req, res, next) => {
@@ -58,7 +58,7 @@ const getPaymentStatus = async (req, res, next) => {
   try {
     const {_id} = req.user;
     const criteria = {userId:mongoose.Types.ObjectId(_id), isSubscriptionActive: true};
-    const subscription = await subscriptionQueries.findOne(criteria);
+    const subscription = await subscriptionQueries.findOne({criteria});
 
     const paymentCriteria = {userId:mongoose.Types.ObjectId(_id), reviewStatus:"inReview"};
     const payment = await paymentQueries.findOne({criteria: paymentCriteria});
@@ -131,13 +131,55 @@ const getAllPayments = async(req,res,next)=>{
 // update payment by id
 const updatePaymentById = async(req,res,next)=>{
   try {
-    const {reviewStatus, _id} = req.body;
+    const {reviewStatus, _id, userId} = req.body;
     const id = mongoose.Types.ObjectId(_id);
     reviewStatus==='verified'? paid=true: paid=false;
     const updateObj = {reviewStatus, paid};
+    
+    // 1. fetch user
+    const user = await userQueries.findOne({criteria: {_id:mongoose.Types.ObjectId(userId)}});
+    const {email, name} = user;
+
+    // 2. update payment
     const response = await paymentQueries.findByIdAndUpdate({id, updateObj});
-    if(!response) res.status(400).send("No updated payment");
-    res.status(200).send(response);
+    if(!response) res.status(400).send("Cannot update payment");
+    if(reviewStatus!=="verified"){
+      await sendEmail({email, subject: "Payment Status", emailText:`Dear ${name}, sorry to inform that your payment is ${reviewStatus}`});
+      res.status(400).send("Success");
+    } 
+
+    // 3. update subscription
+    await subscriptionQueries.findOneAndUpdate(
+      {
+        condition:{userId: mongoose.Types.ObjectId(userId), isSubscriptionActive:true},
+        update: {isSubscriptionActive: false}
+      },
+    );
+
+    // 4. find payment and create subscription
+    const updatedPayment = await paymentQueries.findOne({criteria:{_id:id,userId: mongoose.Types.ObjectId(userId) } });
+    if(!updatedPayment) res.status(400).send("No updated payment");
+
+    // Get the current date
+    var currentDate = new Date();
+    var futureDate = new Date();
+    futureDate.setMonth(currentDate.getMonth() + 6);
+
+    const createSubscription = {
+      subscriptionStartDate: currentDate,
+      subscriptionEndDate: futureDate,
+      subscriptionAmount: updatedPayment.amount,
+      subscriptionType: "Pro",
+      subscriptionItem: updatedPayment.item,
+      isSubscriptionActive: true,
+      userId,
+    };
+    await subscriptionQueries.save({obj: createSubscription}); 
+    if(!createSubscription) res.status(400).send("Could not create subscription");
+
+    // 5. send payment status in email
+    await sendEmail({email, subject: "Payment Status", emailText:`Dear ${name}, Your Payment is ${reviewStatus} and you are a pro member from now`});
+    res.status(200).send("Success Updating payment");
   } catch (error) {
     console.error(error)
     res.status(400).send("Something went wrong updating payment")

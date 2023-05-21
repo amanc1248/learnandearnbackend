@@ -24,7 +24,7 @@ const {
   getUserData,
 } = require("../controllers/user.controller");
 const {
-  createSubscription,
+  createFreeSubscription,
 } = require("../controllers/subscription.controller");
 const router = express.Router();
 
@@ -34,7 +34,7 @@ router.post(
   waitFunction,
   checkUserIfExists,
   createUser,
-  createSubscription,
+  createFreeSubscription,
   sendSlackInvitationEmail
 );
 
