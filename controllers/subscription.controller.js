@@ -66,7 +66,7 @@ const getAllActiveSubscriptionOfTheUser = async (req, res, next) => {
 // get subscription by id
 const getSubscriptionById = async(req,res,next)=>{
   try {
-    const {subscriptionId} = req.query;
+    const {subscriptionId} = req.params;
     const subscription = await subscriptionQueries.findByIdAndPopulateUser({_id:subscriptionId});
     if(!subscription) return res.status(400).send("Subscription not found");
     return res.status(200).send(subscription);
