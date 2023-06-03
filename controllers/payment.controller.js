@@ -77,13 +77,6 @@ const getPaymentStatus = async (req, res, next) => {
       res.status(200).send({show: true});
     }
 
-    // const { _id: userId } = req.user;
-
-    // const reviewStatus = "inReview";
-    // const payment = await paymentQueries.findOne({
-    //   userId,
-    //   reviewStatus,
-    // });
   } catch (e) {
     console.log(e);
     res.status(400).send("Something went wrong");

@@ -22,6 +22,7 @@ const {
   adminLogin,
   getFullDetailsOfUser,
   getUserData,
+  checkIsUserPro,
 } = require("../controllers/user.controller");
 const {
   createFreeSubscription,
@@ -60,6 +61,7 @@ router.put(
 );
 router.put("/changePassword", authenticateToken, changeUserPassword);
 router.get("/",authenticateToken, getUserData);
+router.get("/isUserPro", authenticateToken, checkIsUserPro)
 
 // admin routes
 router.get("/adminLogin", waitFunction, adminLogin, generateJwtToken);

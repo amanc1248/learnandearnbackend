@@ -6,6 +6,7 @@ const { generateJwt } = require("../utils/jwt.util");
 const { sendEmail } = require("../utils/email.util");
 const { userQueries } = require("../queries/user.queries");
 const mongoose = require("mongoose");
+const { subscriptionQueries } = require("../queries/subscription.queries");
 
 // create user
 const createUser = async (req, res, next) => {
@@ -372,6 +373,27 @@ const updateIsUpgradeable = async(req,res,next)=>{
     throw new Error(error)
   }
 }
+
+// check if user is pro
+const checkIsUserPro = async(req,res,next)=>{
+  try {
+    const {_id, email} = req.user;
+    const filter = {_id: mongoose.Types.ObjectId(_id), email};
+    const user = await userQueries.findOne({criteria: filter});
+    if(!user) res.status(400).send("User not found");
+    const subscriptionCriteria = {userId: mongoose.Types.ObjectId(_id), isSubscriptionActive: true};
+    const subscription = await subscriptionQueries.findOne({criteria: subscriptionCriteria});
+    if(!subscription) res.status(400).send("Subscription not found of the user which is not possible");
+    if(subscription?.subscriptionType==="Pro"){
+      return res.status(200).send(true);
+    }else{
+      return res.status(200).send(false);
+    }
+  } catch (error) {
+    console.error(error)
+    return res.status(400).send("Something went wrong checking if user is pro");
+  }
+}
 module.exports = {
   createUser,
   checkUserIfExists,
@@ -391,4 +413,5 @@ module.exports = {
   adminGetAllUsers,
   getUserData,
   updateIsUpgradeable,
+  checkIsUserPro,
 };
