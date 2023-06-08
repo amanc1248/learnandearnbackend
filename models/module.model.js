@@ -3,7 +3,7 @@ const mongoose = require("mongoose");
 const moduleSchema = new mongoose.Schema({
   courseId: {
     type: mongoose.Types.ObjectId,
-    required: true,
+    required: false,
   },
   title: {
     type: String,
@@ -30,6 +30,15 @@ const moduleSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
+  position: {
+    type: Number,
+    required: true,
+  },
+  isDeleted:{
+    type: Boolean,
+    required: true, 
+    default: false,
+  }
 });
 
 const Module = mongoose.model("Module", moduleSchema);

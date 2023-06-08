@@ -25,6 +25,11 @@ const contentSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
+  isDeleted:{
+    type: Boolean,
+    required: true, 
+    default: false,
+  }
 });
 
 const Content = mongoose.model("Content", contentSchema);
