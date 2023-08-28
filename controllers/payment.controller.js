@@ -4,6 +4,7 @@ const { subscriptionQueries } = require("../queries/subscription.queries");
 const { uploadImageUtil } = require("../utils/image.utils");
 const { sendEmail } = require("../utils/email.util");
 const { userQueries } = require("../queries/user.queries");
+const { sendSlackInvitationEmail } = require("./user.controller");
 
 // add payment
 const createPayment = async (req, res, next) => {
@@ -171,7 +172,12 @@ const updatePaymentById = async(req,res,next)=>{
     if(!createSubscription) res.status(400).send("Could not create subscription");
 
     // 5. send payment status in email
-    await sendEmail({email, subject: "Payment Status", emailText:`Dear ${name}, Your Payment is ${reviewStatus} and you are a pro member from now`});
+    await sendEmail({email, subject: "Payment Status", emailText:`Dear ${name}, Your Payment is ${reviewStatus} and you are a pro member from now. Please follow up our next email to join our slack community. Lets get started🎉🎉🎉`});
+    await sendEmail({email, subject: "Slack Invitation", emailText:`Dear ${name}, We are delighted to have you on board. Please click the link below to join our wonderful slack community of aspiring full stack engineers.
+    Slack link: https://join.slack.com/t/fullstackdeve-v7d6104/shared_invite/zt-22gbvqpa8-s0JSzJWtlazLzJrCCKDDrw`});
+
+    // 6. send slack invitation in email to the user
+    // await sendSlackInvitationEmail()
     res.status(200).send("Success Updating payment");
   } catch (error) {
     console.error(error)

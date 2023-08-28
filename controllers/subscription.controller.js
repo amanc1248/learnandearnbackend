@@ -36,7 +36,7 @@ const createFreeSubscription = async (req, res, next) => {
     if (!createdSubscription)
       res.status(400).send("Something went wrong creating subscription");
     res.createdSubscription = createdSubscription;
-    next();
+    return res.status(200).send("success");
   } catch (error) {
     console.error(error);
     res.status(400).send("Something went wrong creating subscription");

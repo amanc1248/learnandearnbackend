@@ -9,7 +9,7 @@ const { waitFunction } = require("../utils/test.util");
 const {
   checkUserIfExists,
   createUser,
-  sendSlackInvitationEmail,
+  // sendSlackInvitationEmail,
   userLogin,
   validateUserPassword,
   generateJwtToken,
@@ -36,7 +36,7 @@ router.post(
   checkUserIfExists,
   createUser,
   createFreeSubscription,
-  sendSlackInvitationEmail
+  // sendSlackInvitationEmail
 );
 
 router.post("/sendEmail", sendEmail);
